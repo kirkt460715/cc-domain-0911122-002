@@ -17,6 +17,8 @@ python3 -m hangar_ingest --db hangar.sqlite3 init
 python3 -m hangar_ingest --db :memory: demo --fixture fixtures/demo.json
 python3 -m hangar_ingest commands
 python3 -m hangar_ingest --db hangar.sqlite3 ingest feed.csv --batch day1 --source feed1 --format csv
+python3 -m hangar_ingest --db hangar.sqlite3 preview measurements.xlsx --source feed1 --rules rules.json
+python3 -m hangar_ingest --db hangar.sqlite3 confirm measurements.xlsx --preview-id <预览ID> --batch day1
 python3 -m hangar_ingest --db hangar.sqlite3 check
 python3 -m unittest discover -s tests -v
 python3 -m compileall -q hangar_ingest

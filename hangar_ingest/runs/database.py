@@ -66,6 +66,11 @@ CREATE TABLE IF NOT EXISTS source_watermarks(
  source TEXT PRIMARY KEY,watermark TEXT NOT NULL,revision INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS processing_claims(
  batch_id TEXT PRIMARY KEY,owner TEXT NOT NULL,generation INTEGER NOT NULL,expires_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS workbook_previews(
+ preview_id TEXT PRIMARY KEY,source TEXT NOT NULL,workbook_hash TEXT NOT NULL,
+ rules TEXT NOT NULL,rules_digest TEXT NOT NULL,config_version TEXT NOT NULL,
+ result TEXT NOT NULL,state TEXT NOT NULL,confirmed_batch TEXT,
+ created_at TEXT NOT NULL,expires_at TEXT NOT NULL);
 '''
 
 

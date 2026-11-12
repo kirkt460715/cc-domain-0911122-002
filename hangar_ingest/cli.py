@@ -6,7 +6,7 @@ from pathlib import Path
 from hangar_ingest.types import PipelineError, canonical, fail
 from hangar_ingest.api import Application
 from hangar_ingest.runs.database import Database
-from hangar_ingest.runs import batches, inspection, processor
+from hangar_ingest.runs import batches, inspection, intake, processor
 from hangar_ingest.exports import releases, tabular
 
 
@@ -28,6 +28,17 @@ def make_parser():
     ingest.add_argument('--format', choices=['csv', 'ndjson'], default='ndjson')
     ingest.add_argument('--chunk', type=int, default=100)
     ingest.add_argument('--stage-only', action='store_true')
+    preview_cmd = sub.add_parser('preview')
+    preview_cmd.add_argument('path')
+    preview_cmd.add_argument('--source', required=True)
+    preview_cmd.add_argument('--rules', required=True)
+    preview_cmd.add_argument('--ttl', type=int, default=3600)
+    confirm_cmd = sub.add_parser('confirm')
+    confirm_cmd.add_argument('path')
+    confirm_cmd.add_argument('--preview-id', dest='preview_id', required=True)
+    confirm_cmd.add_argument('--batch', required=True)
+    confirm_cmd.add_argument('--chunk', type=int, default=100)
+    confirm_cmd.add_argument('--stage-only', action='store_true')
     batch = sub.add_parser('batch')
     batch.add_argument('path')
     export = sub.add_parser('export')
@@ -107,6 +118,13 @@ def dispatch(app, args):
         return app.batch(json_input(args.path))
     if args.command == 'ingest':
         staged = batches.stage(app.db, args.batch, args.source, read(args.path), args.format)
+        if args.stage_only:
+            return staged
+        return processor.drain(app.db, staged['batch_id'], chunk=args.chunk)
+    if args.command == 'preview':
+        return intake.preview(app.db, args.source, read(args.path), json_input(args.rules), args.ttl)
+    if args.command == 'confirm':
+        staged = intake.confirm(app.db, args.preview_id, args.batch, read(args.path))
         if args.stage_only:
             return staged
         return processor.drain(app.db, staged['batch_id'], chunk=args.chunk)

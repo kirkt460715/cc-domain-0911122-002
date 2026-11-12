@@ -1,7 +1,7 @@
 from hangar_ingest.types import fail, object_fields
 from hangar_ingest.decoders import workorders
 from hangar_ingest.quality import devices, rules, review, recalibration, coverage, profiles, units, alignment, preflight
-from hangar_ingest.runs import batches, claims, inspection, journal, partitions, processor, windows, maintenance
+from hangar_ingest.runs import batches, claims, inspection, intake, journal, partitions, processor, windows, maintenance
 from hangar_ingest.runs.orchestrator import Pipeline
 from hangar_ingest.exports import releases, tabular, watermarks, transfer
 from hangar_ingest.exports.contracts import DeliveryContracts
@@ -49,6 +49,9 @@ class Application:
             'order.history': (workorders.history, {'order_id'}, set()),
             'order.overlap': (workorders.overlap, {'aircraft', 'component', 'start', 'end'}, set()),
             'batch.get': (batches.get, {'batch_id'}, set()),
+            'workbook.preview': (intake.preview_base64, {'source', 'content_base64', 'rules'}, {'ttl_seconds'}),
+            'workbook.preview.get': (intake.get_preview, {'preview_id'}, set()),
+            'workbook.confirm': (intake.confirm_base64, {'preview_id', 'batch_id', 'content_base64'}, set()),
             'batch.rows': (batches.rows, {'batch_id'}, {'after', 'limit'}),
             'batch.list': (batches.listing, set(), {'state'}),
             'batch.pause': (batches.pause, {'batch_id', 'revision'}, set()),
